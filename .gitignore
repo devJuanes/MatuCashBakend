@@ -3,3 +3,5 @@ node_modules
 .wwebjs_cache
 .env
 npm-debug.log*
+logs/*
+!logs/.gitkeep

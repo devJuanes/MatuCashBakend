@@ -10,7 +10,11 @@
     "test": "echo \"No tests yet\"",
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "check": "node -e \"console.log('ok')\""
+    "check": "node -e \"console.log('ok')\"",
+    "pm2:start": "pm2 start ecosystem.config.cjs --env production",
+    "pm2:restart": "pm2 restart ecosystem.config.cjs --env production",
+    "pm2:logs": "pm2 logs matucash-whatsapp-api",
+    "pm2:save": "pm2 save"
   },
   "nodemonConfig": {
     "ignore": [

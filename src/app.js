@@ -8,7 +8,19 @@ const notificationRoutes = require('./routes/notifications')
 
 const app = express()
 
-app.use(cors({ origin: env.corsOrigin }))
+if (env.trustProxy) {
+  app.set('trust proxy', 1)
+}
+
+const corsOriginSet = new Set(env.corsOrigins)
+app.use(cors({
+  origin(origin, callback) {
+    // Permite requests sin origin (health checks, curl server-side)
+    if (!origin) return callback(null, true)
+    if (corsOriginSet.has(origin)) return callback(null, true)
+    return callback(new Error(`CORS bloqueado para origin: ${origin}`))
+  }
+}))
 app.use(express.json({ limit: '1mb' }))
 
 app.get('/api/health', (_req, res) => {
@@ -16,13 +28,22 @@ app.get('/api/health', (_req, res) => {
     ok: true,
     service: 'matucash-whatsapp-api',
     env: env.nodeEnv,
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    uptimeSec: Math.round(process.uptime()),
+    corsOrigins: env.corsOrigins
   })
 })
 
 app.use('/api', authMiddleware)
 app.use('/api/whatsapp', whatsappRoutes)
 app.use('/api/notifications', notificationRoutes)
+
+app.use((err, _req, res, next) => {
+  if (err && String(err.message || '').startsWith('CORS bloqueado')) {
+    return res.status(403).json({ ok: false, error: err.message })
+  }
+  return next(err)
+})
 
 app.use((err, _req, res, _next) => {
   logger.error('Unhandled error', { message: err.message, stack: err.stack })

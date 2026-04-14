@@ -33,6 +33,7 @@ npm run dev
 - `POST /api/notifications/payment-received`
 - `POST /api/notifications/loan-overdue`
 - `POST /api/notifications/send-ticket`
+- `POST /api/notifications/send-ticket-image`
 - `POST /api/notifications/custom`
 
 ## Buenas prácticas anti-bloqueo
@@ -43,3 +44,17 @@ npm run dev
 - Mantén una sola sesión por número.
 
 > Nota: ningún método elimina al 100% el riesgo de bloqueo. Este backend reduce señales de automatización, pero siempre depende de políticas de WhatsApp.
+
+## Producción (PM2 + Subdominio)
+
+- Archivo PM2 listo: `ecosystem.config.cjs`
+- Plantilla Nginx: `deploy/nginx/matucash-api.conf`
+- Guía paso a paso: `deploy/DEPLOY_PM2_SUBDOMINIO.md`
+
+Comandos rápidos:
+
+```bash
+npm run pm2:start
+npm run pm2:logs
+npm run pm2:save
+```
