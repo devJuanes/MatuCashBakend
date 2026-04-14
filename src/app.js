@@ -7,19 +7,24 @@ const whatsappRoutes = require('./routes/whatsapp')
 const notificationRoutes = require('./routes/notifications')
 
 const app = express()
+const normalizeOrigin = (origin) => String(origin || '').trim().replace(/\/+$/, '')
 
 if (env.trustProxy) {
   app.set('trust proxy', 1)
 }
 
-const corsOriginSet = new Set(env.corsOrigins)
+const corsOriginSet = new Set(env.corsOrigins.map((o) => normalizeOrigin(o)))
 app.use(cors({
   origin(origin, callback) {
     // Permite requests sin origin (health checks, curl server-side)
     if (!origin) return callback(null, true)
-    if (corsOriginSet.has(origin)) return callback(null, true)
+    const incomingOrigin = normalizeOrigin(origin)
+    if (corsOriginSet.has(incomingOrigin)) return callback(null, true)
     return callback(new Error(`CORS bloqueado para origin: ${origin}`))
-  }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false
 }))
 app.use(express.json({ limit: '1mb' }))
 

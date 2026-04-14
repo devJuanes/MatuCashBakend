@@ -13,9 +13,10 @@ function toInt(value, fallback) {
 }
 
 function splitCsv(value) {
+  const normalizeOrigin = (origin) => String(origin || '').trim().replace(/\/+$/, '')
   return String(value || '')
     .split(',')
-    .map((x) => x.trim())
+    .map((x) => normalizeOrigin(x))
     .filter(Boolean)
 }
 
