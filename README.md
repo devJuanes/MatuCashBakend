@@ -58,3 +58,5 @@ npm run pm2:start
 npm run pm2:logs
 npm run pm2:save
 ```
+
+Subdominio recomendado para este proyecto: `matucash.matudb.com`.
