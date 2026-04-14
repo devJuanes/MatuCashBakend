@@ -5,6 +5,7 @@ const logger = require('./lib/logger')
 const { authMiddleware } = require('./middleware/auth')
 const whatsappRoutes = require('./routes/whatsapp')
 const notificationRoutes = require('./routes/notifications')
+const uploadRoutes = require('./routes/uploads')
 
 const app = express()
 const normalizeOrigin = (origin) => String(origin || '').trim().replace(/\/+$/, '')
@@ -23,7 +24,7 @@ app.use(cors({
     return callback(new Error(`CORS bloqueado para origin: ${origin}`))
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   credentials: false
 }))
 app.use(express.json({ limit: '1mb' }))
@@ -40,6 +41,7 @@ app.get('/api/health', (_req, res) => {
 })
 
 app.use('/api', authMiddleware)
+app.use('/api/uploads', uploadRoutes)
 app.use('/api/whatsapp', whatsappRoutes)
 app.use('/api/notifications', notificationRoutes)
 

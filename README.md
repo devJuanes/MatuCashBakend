@@ -35,6 +35,10 @@ npm run dev
 - `POST /api/notifications/send-ticket`
 - `POST /api/notifications/send-ticket-image`
 - `POST /api/notifications/custom`
+- `POST /api/uploads/cedula` — multipart (`file` + opcional `clientId`, `replaceOf` para borrar la imagen anterior)
+- `GET /api/uploads/cedula/:fileName` — descarga la imagen (mismo `Authorization: Bearer` que el resto de `/api`)
+
+Archivos se guardan en disco (`UPLOADS_DIR`, por defecto `./uploads/cedula/`). Ajusta `MAX_UPLOAD_MB` y en Nginx `client_max_body_size` si subes fotos grandes.
 
 ## Buenas prácticas anti-bloqueo
 
