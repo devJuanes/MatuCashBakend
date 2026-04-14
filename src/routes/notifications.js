@@ -41,16 +41,21 @@ router.post('/loan-created', async (req, res) => {
     const textResult = await sendMessage({ to, message })
 
     let mediaResult = null
+    let mediaError = null
     if (payload.ticketImageBase64) {
-      mediaResult = await sendMediaFromDataUrl({
-        to,
-        dataUrl: payload.ticketImageBase64,
-        caption: '🎟️ *Ticket digital de tu préstamo*',
-        filename: `ticket-${payload.loanId || Date.now()}.png`
-      })
+      try {
+        mediaResult = await sendMediaFromDataUrl({
+          to,
+          dataUrl: payload.ticketImageBase64,
+          caption: '🎟️ *Ticket digital de tu préstamo*',
+          filename: `ticket-${payload.loanId || Date.now()}.png`
+        })
+      } catch (err) {
+        mediaError = err instanceof Error ? err.message : 'Error enviando ticket imagen'
+      }
     }
 
-    return res.json({ ok: true, data: { textResult, mediaResult } })
+    return res.json({ ok: true, data: { textResult, mediaResult, mediaError } })
   } catch (err) {
     return res.status(500).json({ ok: false, error: err.message })
   }
