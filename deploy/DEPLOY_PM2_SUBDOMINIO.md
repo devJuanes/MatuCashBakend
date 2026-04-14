@@ -23,7 +23,7 @@ Edita `.env` con tus datos reales:
 - `NODE_ENV=production`
 - `PORT=4100`
 - `API_TOKEN=<token-seguro>`
-- `CORS_ORIGIN=https://app.tudominio.com,https://www.app.tudominio.com`
+- `CORS_ORIGIN=https://devjuanes.com,https://www.devjuanes.com`
 
 ## 3) Iniciar con PM2
 
@@ -40,7 +40,7 @@ Ejecuta el comando que te devuelva `pm2 startup` para persistencia tras reinicio
 En tu proveedor DNS crea:
 
 - Tipo: `A`
-- Host: `api`
+- Host: `matucash`
 - Valor: `<IP_PUBLICA_DE_TU_SERVIDOR>`
 
 ## 5) Nginx reverse proxy
@@ -49,7 +49,7 @@ En tu proveedor DNS crea:
 sudo cp deploy/nginx/matucash-api.conf /etc/nginx/sites-available/matucash-api.conf
 ```
 
-Edita `server_name` a tu dominio real (ej: `api.midominio.com`), luego:
+Confirma que `server_name` sea `matucash.devjuanes.com`, luego:
 
 ```bash
 sudo ln -s /etc/nginx/sites-available/matucash-api.conf /etc/nginx/sites-enabled/matucash-api.conf
@@ -60,13 +60,13 @@ sudo systemctl reload nginx
 ## 6) SSL con Let's Encrypt
 
 ```bash
-sudo certbot --nginx -d api.tudominio.com
+sudo certbot --nginx -d matucash.devjuanes.com
 ```
 
 ## 7) Verificación
 
 ```bash
-curl https://api.tudominio.com/api/health
+curl https://matucash.devjuanes.com/api/health
 pm2 logs matucash-whatsapp-api
 ```
 
@@ -77,6 +77,6 @@ Deberías recibir `{ "ok": true, ... }`.
 En `MatuCash/.env`:
 
 ```env
-VITE_WHATSAPP_API_URL=https://api.tudominio.com
+VITE_WHATSAPP_API_URL=https://matucash.devjuanes.com
 VITE_WHATSAPP_API_TOKEN=<mismo-token-que-API_TOKEN>
 ```
