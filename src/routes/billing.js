@@ -46,12 +46,13 @@ router.post('/checkout-link', async (req, res) => {
 router.post('/confirm-transaction', async (req, res) => {
   const uid = sanitizeUid(req.body?.uid)
   const transactionId = String(req.body?.transactionId || '').trim()
+  const environment = String(req.body?.environment || '').trim().toLowerCase()
   if (!uid || !transactionId) {
     return res.status(400).json({ ok: false, error: 'uid y transactionId son requeridos' })
   }
 
   try {
-    const tx = await getTransaction(transactionId)
+    const tx = await getTransaction(transactionId, { environment })
     const reference = String(tx?.reference || '')
     const ownerUid = referenceToUid(reference)
     if (!ownerUid || ownerUid !== uid) {

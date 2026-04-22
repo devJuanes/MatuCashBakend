@@ -51,5 +51,6 @@ module.exports = {
   wompiIntegritySecret: process.env.WOMPI_INTEGRITY_SECRET || '',
   wompiWebhookSecret: process.env.WOMPI_WEBHOOK_SECRET || '',
   wompiBaseUrl: String(process.env.WOMPI_BASE_URL || 'https://production.wompi.co/v1').trim().replace(/\/+$/, ''),
+  wompiTestBaseUrl: String(process.env.WOMPI_TEST_BASE_URL || 'https://sandbox.wompi.co/v1').trim().replace(/\/+$/, ''),
   cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 20000)
 }

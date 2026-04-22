@@ -8,6 +8,14 @@ function buildReference(uid) {
   return `${PLAN_CODE}_${uid}_${Date.now()}`
 }
 
+function resolveWompiBaseUrl(environment) {
+  const mode = String(environment || '').trim().toLowerCase()
+  if (mode === 'test') return env.wompiTestBaseUrl
+  if (mode === 'prod' || mode === 'production') return env.wompiBaseUrl
+  const keyLooksTest = String(env.wompiPrivateKey || '').startsWith('prv_test_')
+  return keyLooksTest ? env.wompiTestBaseUrl : env.wompiBaseUrl
+}
+
 function buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl }) {
   if (!env.wompiPublicKey) throw new Error('Falta WOMPI_PUBLIC_KEY')
   if (!env.wompiIntegritySecret) throw new Error('Falta WOMPI_INTEGRITY_SECRET')
@@ -42,11 +50,12 @@ function buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl }) {
   }
 }
 
-async function getTransaction(transactionId) {
+async function getTransaction(transactionId, options = {}) {
   if (!env.wompiPrivateKey) throw new Error('Falta WOMPI_PRIVATE_KEY')
   const id = String(transactionId || '').trim()
   if (!id) throw new Error('transactionId es requerido')
-  const res = await fetch(`${env.wompiBaseUrl}/transactions/${encodeURIComponent(id)}`, {
+  const baseUrl = resolveWompiBaseUrl(options.environment)
+  const res = await fetch(`${baseUrl}/transactions/${encodeURIComponent(id)}`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${env.wompiPrivateKey}`,
