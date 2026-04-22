@@ -4,14 +4,6 @@ const env = require('../config/env')
 const PLAN_CODE = 'cashpro'
 const PLAN_CURRENCY = 'COP'
 
-function normalizePhone(phone) {
-  const digits = String(phone || '').replace(/\D/g, '')
-  if (!digits) return ''
-  if (digits.length === 10) return `57${digits}`
-  if (digits.length === 12 && digits.startsWith('57')) return digits
-  return digits
-}
-
 function buildReference(uid) {
   return `${PLAN_CODE}_${uid}_${Date.now()}`
 }
@@ -36,16 +28,17 @@ function buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl }) {
     'redirect-url': redirectUrl || `${env.frontendAppUrl}/billing/return`
   })
 
-  if (email) params.set('customer-data:email', email.trim())
-  if (fullName) params.set('customer-data:full-name', fullName.trim())
-  const normalizedPhone = normalizePhone(phone)
-  if (normalizedPhone) params.set('customer-data:phone-number', normalizedPhone)
+  // customer-data:* es opcional. Lo omitimos para evitar que librerías de terceros
+  // intenten sanitizar query params con PII y rompan el parsing del checkout.
+  void email
+  void fullName
+  void phone
 
   return {
     reference,
     amountInCents,
     currency: PLAN_CURRENCY,
-    checkoutUrl: `https://checkout.wompi.co/l/?${params.toString()}`
+    checkoutUrl: `https://checkout.wompi.co/p/?${params.toString()}`
   }
 }
 
