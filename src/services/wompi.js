@@ -61,45 +61,9 @@ async function getTransaction(transactionId) {
   return payload?.data || null
 }
 
-async function createRecurringCharge({ uid, email, paymentSourceId }) {
-  if (!env.wompiPrivateKey) throw new Error('Falta WOMPI_PRIVATE_KEY')
-  const sourceId = Number(paymentSourceId)
-  if (!Number.isFinite(sourceId) || sourceId <= 0) {
-    throw new Error('paymentSourceId inválido para cobro recurrente')
-  }
-  const reference = buildReference(uid)
-  const amountInCents = env.cashProMonthlyCop * 100
-  const payload = {
-    amount_in_cents: amountInCents,
-    currency: PLAN_CURRENCY,
-    customer_email: String(email || '').trim(),
-    payment_method: {
-      installments: 1
-    },
-    reference,
-    payment_source_id: sourceId
-  }
-
-  const res = await fetch(`${env.wompiBaseUrl}/transactions`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.wompiPrivateKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  })
-  const body = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    const reason = body?.error?.reason || body?.error?.type || `HTTP ${res.status}`
-    throw new Error(`No se pudo crear cobro recurrente: ${reason}`)
-  }
-  return body?.data || null
-}
-
 module.exports = {
   PLAN_CODE,
   PLAN_CURRENCY,
   buildCheckoutUrl,
-  getTransaction,
-  createRecurringCharge
+  getTransaction
 }

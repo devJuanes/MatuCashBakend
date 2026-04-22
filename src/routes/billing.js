@@ -22,14 +22,6 @@ function referenceToUid(reference) {
   return parts.slice(1, -1).join('_')
 }
 
-function extractPaymentSourceId(tx) {
-  const direct = Number(tx?.payment_source_id)
-  if (Number.isFinite(direct) && direct > 0) return direct
-  const nested = Number(tx?.payment_method?.payment_source_id)
-  if (Number.isFinite(nested) && nested > 0) return nested
-  return 0
-}
-
 router.post('/checkout-link', async (req, res) => {
   const uid = sanitizeUid(req.body?.uid)
   const email = String(req.body?.email || '').trim()
@@ -68,8 +60,7 @@ router.post('/confirm-transaction', async (req, res) => {
 
     const status = String(tx?.status || '').toUpperCase()
     if (status === 'APPROVED') {
-      const paymentSourceId = extractPaymentSourceId(tx)
-      const subscription = await activateSubscription({ uid, transactionId, reference, paymentSourceId })
+      const subscription = await activateSubscription({ uid, transactionId, reference })
       return res.json({
         ok: true,
         data: {

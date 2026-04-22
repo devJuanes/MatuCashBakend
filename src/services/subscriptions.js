@@ -30,7 +30,7 @@ async function markPendingPayment({ uid, email, fullName, reference }) {
   )
 }
 
-async function activateSubscription({ uid, transactionId, reference, paymentSourceId }) {
+async function activateSubscription({ uid, transactionId, reference }) {
   const db = getAdminDb()
   const now = Date.now()
   const userRef = db.collection('users').doc(uid)
@@ -50,7 +50,6 @@ async function activateSubscription({ uid, transactionId, reference, paymentSour
         currentPeriodEndMs: periodEnd,
         lastReference: reference,
         lastTransactionId: transactionId,
-        ...(paymentSourceId ? { paymentSourceId: Number(paymentSourceId) } : {}),
         updatedAtMs: now
       }
     },
@@ -99,43 +98,9 @@ async function getSubscriptionStatus(uid) {
   }
 }
 
-async function listDueRenewals(limit = 20) {
-  const db = getAdminDb()
-  const now = Date.now()
-  const snap = await db
-    .collection('users')
-    .where('subscription.status', '==', 'active')
-    .where('subscription.currentPeriodEndMs', '<=', now)
-    .limit(Math.max(1, Math.min(50, Number(limit) || 20)))
-    .get()
-
-  return snap.docs.map((d) => {
-    const data = d.data() || {}
-    const profile = data.profile || {}
-    const subscription = data.subscription || {}
-    return {
-      uid: d.id,
-      email: String(profile.email || ''),
-      paymentSourceId: Number(subscription.paymentSourceId || 0),
-      currentPeriodEndMs: Number(subscription.currentPeriodEndMs || 0)
-    }
-  })
-}
-
-async function markRenewalSuccess({ uid, transactionId, reference }) {
-  return activateSubscription({ uid, transactionId, reference })
-}
-
-async function markRenewalFailed({ uid, reason }) {
-  return markPaymentIssue({ uid, reason })
-}
-
 module.exports = {
   markPendingPayment,
   activateSubscription,
   markPaymentIssue,
-  getSubscriptionStatus,
-  listDueRenewals,
-  markRenewalSuccess,
-  markRenewalFailed
+  getSubscriptionStatus
 }

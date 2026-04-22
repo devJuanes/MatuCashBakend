@@ -51,6 +51,5 @@ module.exports = {
   wompiIntegritySecret: process.env.WOMPI_INTEGRITY_SECRET || '',
   wompiWebhookSecret: process.env.WOMPI_WEBHOOK_SECRET || '',
   wompiBaseUrl: String(process.env.WOMPI_BASE_URL || 'https://production.wompi.co/v1').trim().replace(/\/+$/, ''),
-  cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 20000),
-  renewalCheckMs: Math.max(60000, toInt(process.env.RENEWAL_CHECK_MS, 6 * 60 * 60 * 1000))
+  cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 20000)
 }
