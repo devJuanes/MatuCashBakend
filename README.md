@@ -7,7 +7,9 @@ Backend para enviar notificaciones automáticas de préstamos por WhatsApp usand
 - Escaneo de QR para conectar una cuenta WhatsApp.
 - Estado de sesión (`ready`, `qr`, `disconnected`).
 - Cola de envío con retraso aleatorio para reducir comportamiento robótico.
-- Simulación de "escribiendo..." antes de cada mensaje.
+- Simulación de "escribiendo..." antes de cada mensaje (duración según longitud del texto + jitter).
+- Pausa aleatoria antes de escribir (`PRE_SEND_DELAY_*`).
+- Plantillas por usuario en Firebase (`users/{uid}.notificationWhatsApp`) consumidas al enviar notificaciones.
 - Endpoints listos para:
   - Préstamo creado
   - Abono recibido
@@ -35,6 +37,8 @@ npm run dev
 - `POST /api/notifications/send-ticket`
 - `POST /api/notifications/send-ticket-image`
 - `POST /api/notifications/custom`
+- `GET /api/whatsapp-templates/:uid` — leer plantillas y flag `enabled`
+- `PUT /api/whatsapp-templates/:uid` — guardar plantillas (merge)
 - `POST /api/uploads/cedula` — multipart (`file` + opcional `clientId`, `replaceOf` para borrar la imagen anterior)
 - `GET /api/uploads/cedula/:fileName` — descarga la imagen (mismo `Authorization: Bearer` que el resto de `/api`)
 
@@ -43,6 +47,7 @@ Archivos se guardan en disco (`UPLOADS_DIR`, por defecto `./uploads/cedula/`). A
 ## Buenas prácticas anti-bloqueo
 
 - Usa tiempos aleatorios entre mensajes (`MIN_SEND_DELAY_MS`, `MAX_SEND_DELAY_MS`).
+- Ajusta `PRE_SEND_DELAY_*`, `TYPING_DURATION_*`, `TYPING_BASE_MS`, `TYPING_MS_PER_CHAR`, `TYPING_JITTER_MS` si necesitas ritmo más lento.
 - No envíes spam masivo ni repetitivo.
 - Personaliza mensajes con datos reales del cliente.
 - Mantén una sola sesión por número.

@@ -21,8 +21,15 @@ function splitCsv(value) {
     .filter(Boolean)
 }
 
-const minDelay = toInt(process.env.MIN_SEND_DELAY_MS, 5000)
-const maxDelay = toInt(process.env.MAX_SEND_DELAY_MS, 12000)
+const minDelay = toInt(process.env.MIN_SEND_DELAY_MS, 8000)
+const maxDelay = toInt(process.env.MAX_SEND_DELAY_MS, 22000)
+const preSendMin = toInt(process.env.PRE_SEND_DELAY_MIN_MS, 400)
+const preSendMax = toInt(process.env.PRE_SEND_DELAY_MAX_MS, 2200)
+const typingMin = toInt(process.env.TYPING_DURATION_MIN_MS, 1200)
+const typingMax = toInt(process.env.TYPING_DURATION_MAX_MS, 12000)
+const typingBase = toInt(process.env.TYPING_BASE_MS, 600)
+const typingPerChar = toInt(process.env.TYPING_MS_PER_CHAR, 28)
+const typingJitter = toInt(process.env.TYPING_JITTER_MS, 900)
 const corsOrigins = splitCsv(process.env.CORS_ORIGIN || 'http://localhost:5173')
 const maxUploadMb = Math.min(25, Math.max(1, toInt(process.env.MAX_UPLOAD_MB, 6)))
 const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads'))
@@ -37,8 +44,15 @@ module.exports = {
   maxUploadBytes: maxUploadMb * 1024 * 1024,
   defaultCountryCode: process.env.DEFAULT_COUNTRY_CODE || '57',
   whatsappClientId: process.env.WHATSAPP_CLIENT_ID || 'matucash-main',
-  minSendDelayMs: Math.max(1000, Math.min(minDelay, maxDelay)),
+  minSendDelayMs: Math.max(2000, Math.min(minDelay, maxDelay)),
   maxSendDelayMs: Math.max(minDelay, maxDelay),
+  preSendDelayMinMs: Math.max(0, Math.min(preSendMin, preSendMax)),
+  preSendDelayMaxMs: Math.max(preSendMin, preSendMax),
+  typingMinMs: Math.max(300, Math.min(typingMin, typingMax)),
+  typingMaxMs: Math.max(typingMin, typingMax),
+  typingBaseMs: Math.max(0, typingBase),
+  typingMsPerChar: Math.max(0, typingPerChar),
+  typingJitterMs: Math.max(0, typingJitter),
   simulateTyping: toBool(process.env.SIMULATE_TYPING, true),
   headless: toBool(process.env.HEADLESS, true),
   trustProxy: toBool(process.env.TRUST_PROXY, true),

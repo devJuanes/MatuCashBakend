@@ -1,11 +1,7 @@
 const express = require('express')
 const { toWhatsAppId } = require('../lib/phone')
 const { sendMessage, sendMediaByUrl, sendMediaFromDataUrl } = require('../services/whatsappClient')
-const {
-  loanCreatedTemplate,
-  paymentTemplate,
-  overdueTemplate
-} = require('../templates/notifications')
+const { renderMessage } = require('../services/notificationWhatsAppTemplates')
 
 const router = express.Router()
 
@@ -37,7 +33,8 @@ router.post('/loan-created', async (req, res) => {
     const to = requiredPhone(req, res)
     if (!to) return
     const payload = req.body || {}
-    const message = loanCreatedTemplate(payload)
+    const uid = String(payload.uid || '').trim()
+    const message = await renderMessage(uid, 'loanCreated', payload)
     const textResult = await sendMessage({ to, message })
 
     let mediaResult = null
@@ -47,7 +44,7 @@ router.post('/loan-created', async (req, res) => {
         mediaResult = await sendMediaFromDataUrl({
           to,
           dataUrl: payload.ticketImageBase64,
-          caption: '🎟️ *Ticket digital de tu préstamo*',
+          caption: 'Ticket digital de tu prestamo',
           filename: `ticket-${payload.loanId || Date.now()}.png`
         })
       } catch (err) {
@@ -65,7 +62,9 @@ router.post('/payment-received', async (req, res) => {
   try {
     const to = requiredPhone(req, res)
     if (!to) return
-    const message = paymentTemplate(req.body || {})
+    const payload = req.body || {}
+    const uid = String(payload.uid || '').trim()
+    const message = await renderMessage(uid, 'paymentReceived', payload)
     const result = await sendMessage({ to, message })
     return res.json({ ok: true, data: result })
   } catch (err) {
@@ -77,7 +76,9 @@ router.post('/loan-overdue', async (req, res) => {
   try {
     const to = requiredPhone(req, res)
     if (!to) return
-    const message = overdueTemplate(req.body || {})
+    const payload = req.body || {}
+    const uid = String(payload.uid || '').trim()
+    const message = await renderMessage(uid, 'loanOverdue', payload)
     const result = await sendMessage({ to, message })
     return res.json({ ok: true, data: result })
   } catch (err) {
@@ -109,7 +110,7 @@ router.post('/send-ticket-image', async (req, res) => {
     const result = await sendMediaFromDataUrl({
       to,
       dataUrl: ticketImageBase64,
-      caption: caption || '🎟️ Ticket de préstamo',
+      caption: caption || 'Ticket de prestamo',
       filename: filename || `ticket-${Date.now()}.png`
     })
     return res.json({ ok: true, data: result })
