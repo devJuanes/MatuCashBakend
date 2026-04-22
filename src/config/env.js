@@ -41,5 +41,16 @@ module.exports = {
   maxSendDelayMs: Math.max(minDelay, maxDelay),
   simulateTyping: toBool(process.env.SIMULATE_TYPING, true),
   headless: toBool(process.env.HEADLESS, true),
-  trustProxy: toBool(process.env.TRUST_PROXY, true)
+  trustProxy: toBool(process.env.TRUST_PROXY, true),
+  firebaseProjectId: process.env.FIREBASE_PROJECT_ID || '',
+  firebaseServiceAccountJson: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
+  firebaseServiceAccountFile: process.env.FIREBASE_SERVICE_ACCOUNT_FILE || '',
+  frontendAppUrl: String(process.env.FRONTEND_APP_URL || 'http://localhost:5173').trim().replace(/\/+$/, ''),
+  wompiPublicKey: process.env.WOMPI_PUBLIC_KEY || '',
+  wompiPrivateKey: process.env.WOMPI_PRIVATE_KEY || '',
+  wompiIntegritySecret: process.env.WOMPI_INTEGRITY_SECRET || '',
+  wompiWebhookSecret: process.env.WOMPI_WEBHOOK_SECRET || '',
+  wompiBaseUrl: String(process.env.WOMPI_BASE_URL || 'https://production.wompi.co/v1').trim().replace(/\/+$/, ''),
+  cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 20000),
+  renewalCheckMs: Math.max(60000, toInt(process.env.RENEWAL_CHECK_MS, 6 * 60 * 60 * 1000))
 }

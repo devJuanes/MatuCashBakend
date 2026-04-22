@@ -2,9 +2,11 @@ const app = require('./app')
 const env = require('./config/env')
 const logger = require('./lib/logger')
 const { initWhatsApp } = require('./services/whatsappClient')
+const { startRenewalRunner } = require('./services/renewalRunner')
 
 app.listen(env.port, async () => {
   logger.info(`MatuCash WhatsApp API listening on :${env.port}`)
+  startRenewalRunner()
   try {
     await initWhatsApp()
   } catch (err) {

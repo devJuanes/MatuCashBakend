@@ -6,6 +6,7 @@ const { authMiddleware } = require('./middleware/auth')
 const whatsappRoutes = require('./routes/whatsapp')
 const notificationRoutes = require('./routes/notifications')
 const uploadRoutes = require('./routes/uploads')
+const billingRoutes = require('./routes/billing')
 
 const app = express()
 const normalizeOrigin = (origin) => String(origin || '').trim().replace(/\/+$/, '')
@@ -44,6 +45,7 @@ app.use('/api', authMiddleware)
 app.use('/api/uploads', uploadRoutes)
 app.use('/api/whatsapp', whatsappRoutes)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api/billing', billingRoutes)
 
 app.use((err, _req, res, next) => {
   if (err && String(err.message || '').startsWith('CORS bloqueado')) {
