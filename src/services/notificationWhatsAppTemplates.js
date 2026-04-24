@@ -4,40 +4,35 @@ const FIELD = 'notificationWhatsApp'
 
 const DEFAULT_TEMPLATES = {
   loanCreated: [
-    'Hola {{clientName}}',
+    'Hola {{clientName}}, como vas?',
     '',
-    'Tu prestamo fue registrado con exito.',
-    '',
-    'Monto prestado: {{amount}}',
+    'Te confirmo que ya quedo registrado tu prestamo.',
+    'Monto: {{amount}}',
     'Total a pagar: {{total}}',
-    'Fecha limite: {{dueDate}}',
-    'Referencia: {{loanId}}',
+    'Vence: {{dueDate}}',
+    'Ref: {{loanId}}',
     '',
-    'Recuerda pagar a tiempo para evitar mora.',
+    'Cualquier duda me escribes. Gracias.',
     '{{ticketLine}}'
   ].join('\n'),
   paymentReceived: [
-    'Hola {{clientName}}',
+    'Hola {{clientName}}, gracias por tu pago.',
     '',
-    'Recibimos tu abono correctamente.',
-    '',
-    'Abono: {{paymentAmount}}',
+    'Abono recibido: {{paymentAmount}}',
     'Saldo pendiente: {{remaining}}',
-    'Referencia: {{loanId}}',
+    'Ref: {{loanId}}',
     '',
     '{{paidClosingLine}}'
   ].join('\n'),
   loanOverdue: [
-    'Hola {{clientName}}',
-    '',
-    'Tu prestamo presenta mora.',
+    'Hola {{clientName}}, te escribo para recordarte tu cuota pendiente.',
     '',
     'Dias de atraso: {{overdueDays}}',
     'Saldo pendiente: {{remaining}}',
-    'Vencia el: {{dueDate}}',
-    'Referencia: {{loanId}}',
+    'Vencia: {{dueDate}}',
+    'Ref: {{loanId}}',
     '',
-    'Por favor regulariza lo antes posible.'
+    'Cuando puedas, por favor ponte al dia. Gracias.'
   ].join('\n')
 }
 
@@ -120,7 +115,7 @@ function buildValues(payload = {}) {
   const ticketLine = ticketUrl ? `Ticket: ${ticketUrl}` : ''
   const remainingNum = Number(payload.remaining ?? 0)
   const paidClosingLine =
-    remainingNum <= 0 ? 'Tu prestamo quedo liquidado. Gracias.' : 'Gracias por tu pago. Continua con tus proximos abonos.'
+    remainingNum <= 0 ? 'Tu prestamo quedo al dia. Gracias por cumplir.' : 'Gracias, te sigo avisando del siguiente abono.'
 
   return {
     clientName: String(payload.clientName || 'Cliente'),

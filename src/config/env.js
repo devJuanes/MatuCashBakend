@@ -30,6 +30,9 @@ const typingMax = toInt(process.env.TYPING_DURATION_MAX_MS, 12000)
 const typingBase = toInt(process.env.TYPING_BASE_MS, 600)
 const typingPerChar = toInt(process.env.TYPING_MS_PER_CHAR, 28)
 const typingJitter = toInt(process.env.TYPING_JITTER_MS, 900)
+const loanCreatedCooldown = toInt(process.env.NOTIF_COOLDOWN_LOAN_CREATED_MS, 6 * 60 * 60 * 1000)
+const paymentCooldown = toInt(process.env.NOTIF_COOLDOWN_PAYMENT_MS, 90 * 1000)
+const overdueCooldown = toInt(process.env.NOTIF_COOLDOWN_OVERDUE_MS, 24 * 60 * 60 * 1000)
 const corsOrigins = splitCsv(process.env.CORS_ORIGIN || 'http://localhost:5173')
 const maxUploadMb = Math.min(25, Math.max(1, toInt(process.env.MAX_UPLOAD_MB, 6)))
 const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads'))
@@ -53,6 +56,10 @@ module.exports = {
   typingBaseMs: Math.max(0, typingBase),
   typingMsPerChar: Math.max(0, typingPerChar),
   typingJitterMs: Math.max(0, typingJitter),
+  notifCooldownLoanCreatedMs: Math.max(0, loanCreatedCooldown),
+  notifCooldownPaymentMs: Math.max(0, paymentCooldown),
+  notifCooldownOverdueMs: Math.max(0, overdueCooldown),
+  sendTicketMedia: toBool(process.env.SEND_TICKET_MEDIA, false),
   simulateTyping: toBool(process.env.SIMULATE_TYPING, true),
   headless: toBool(process.env.HEADLESS, true),
   trustProxy: toBool(process.env.TRUST_PROXY, true),
@@ -66,5 +73,5 @@ module.exports = {
   wompiWebhookSecret: process.env.WOMPI_WEBHOOK_SECRET || '',
   wompiBaseUrl: String(process.env.WOMPI_BASE_URL || 'https://production.wompi.co/v1').trim().replace(/\/+$/, ''),
   wompiTestBaseUrl: String(process.env.WOMPI_TEST_BASE_URL || 'https://sandbox.wompi.co/v1').trim().replace(/\/+$/, ''),
-  cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 20000)
+  cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 15000)
 }
