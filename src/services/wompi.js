@@ -3,9 +3,27 @@ const env = require('../config/env')
 
 const PLAN_CODE = 'cashpro'
 const PLAN_CURRENCY = 'COP'
+const PERIOD_MONTHS = {
+  monthly: 1,
+  semester: 6,
+  annual: 12
+}
 
-function buildReference(uid) {
-  return `${PLAN_CODE}_${uid}_${Date.now()}`
+function normalizePeriod(input) {
+  const period = String(input || '').trim().toLowerCase()
+  if (period === 'semester') return 'semester'
+  if (period === 'annual') return 'annual'
+  return 'monthly'
+}
+
+function amountForPeriod(period) {
+  if (period === 'semester') return env.cashProSemesterCop
+  if (period === 'annual') return env.cashProAnnualCop
+  return env.cashProMonthlyCop
+}
+
+function buildReference(uid, period) {
+  return `${PLAN_CODE}_${period}_${uid}_${Date.now()}`
 }
 
 function resolveWompiBaseUrl(environment) {
@@ -16,12 +34,13 @@ function resolveWompiBaseUrl(environment) {
   return keyLooksTest ? env.wompiTestBaseUrl : env.wompiBaseUrl
 }
 
-function buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl }) {
+function buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl, planPeriod }) {
   if (!env.wompiPublicKey) throw new Error('Falta WOMPI_PUBLIC_KEY')
   if (!env.wompiIntegritySecret) throw new Error('Falta WOMPI_INTEGRITY_SECRET')
 
-  const reference = buildReference(uid)
-  const amountInCents = env.cashProMonthlyCop * 100
+  const period = normalizePeriod(planPeriod)
+  const reference = buildReference(uid, period)
+  const amountInCents = amountForPeriod(period) * 100
   const signature = crypto
     .createHash('sha256')
     .update(`${reference}${amountInCents}${PLAN_CURRENCY}${env.wompiIntegritySecret}`)
@@ -44,6 +63,7 @@ function buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl }) {
 
   return {
     reference,
+    period,
     amountInCents,
     currency: PLAN_CURRENCY,
     checkoutUrl: `https://checkout.wompi.co/p/?${params.toString()}`
@@ -73,6 +93,9 @@ async function getTransaction(transactionId, options = {}) {
 module.exports = {
   PLAN_CODE,
   PLAN_CURRENCY,
+  PERIOD_MONTHS,
+  normalizePeriod,
+  amountForPeriod,
   buildCheckoutUrl,
   getTransaction
 }

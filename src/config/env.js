@@ -33,14 +33,19 @@ const typingJitter = toInt(process.env.TYPING_JITTER_MS, 900)
 const loanCreatedCooldown = toInt(process.env.NOTIF_COOLDOWN_LOAN_CREATED_MS, 6 * 60 * 60 * 1000)
 const paymentCooldown = toInt(process.env.NOTIF_COOLDOWN_PAYMENT_MS, 90 * 1000)
 const overdueCooldown = toInt(process.env.NOTIF_COOLDOWN_OVERDUE_MS, 24 * 60 * 60 * 1000)
-const corsOrigins = splitCsv(process.env.CORS_ORIGIN || 'http://localhost:5173')
+const corsOrigins = splitCsv(
+  process.env.CORS_ORIGIN || 'https://matucash.com,https://www.matucash.com,http://localhost:5173'
+)
 const maxUploadMb = Math.min(25, Math.max(1, toInt(process.env.MAX_UPLOAD_MB, 6)))
 const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads'))
+const cashProMonthlyCop = toInt(process.env.CASHPRO_MONTHLY_COP, 15000)
+const cashProSemesterCop = toInt(process.env.CASHPRO_SEMESTER_COP, cashProMonthlyCop * 6)
+const cashProAnnualCop = toInt(process.env.CASHPRO_ANNUAL_COP, cashProMonthlyCop * 12)
 
 module.exports = {
   port: toInt(process.env.PORT, 4100),
   nodeEnv: process.env.NODE_ENV || 'development',
-  corsOrigins,
+  corsOrigins: corsOrigins.length ? corsOrigins : ['https://matucash.com', 'https://www.matucash.com', 'http://localhost:5173'],
   apiToken: process.env.API_TOKEN || '',
   uploadsDir,
   maxUploadMb,
@@ -66,12 +71,14 @@ module.exports = {
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID || '',
   firebaseServiceAccountJson: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
   firebaseServiceAccountFile: process.env.FIREBASE_SERVICE_ACCOUNT_FILE || '',
-  frontendAppUrl: String(process.env.FRONTEND_APP_URL || 'http://localhost:5173').trim().replace(/\/+$/, ''),
+  frontendAppUrl: String(process.env.FRONTEND_APP_URL || 'https://matucash.com').trim().replace(/\/+$/, ''),
   wompiPublicKey: process.env.WOMPI_PUBLIC_KEY || '',
   wompiPrivateKey: process.env.WOMPI_PRIVATE_KEY || '',
   wompiIntegritySecret: process.env.WOMPI_INTEGRITY_SECRET || '',
   wompiWebhookSecret: process.env.WOMPI_WEBHOOK_SECRET || '',
   wompiBaseUrl: String(process.env.WOMPI_BASE_URL || 'https://production.wompi.co/v1').trim().replace(/\/+$/, ''),
   wompiTestBaseUrl: String(process.env.WOMPI_TEST_BASE_URL || 'https://sandbox.wompi.co/v1').trim().replace(/\/+$/, ''),
-  cashProMonthlyCop: toInt(process.env.CASHPRO_MONTHLY_COP, 15000)
+  cashProMonthlyCop,
+  cashProSemesterCop,
+  cashProAnnualCop
 }

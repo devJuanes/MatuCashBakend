@@ -1,6 +1,6 @@
 const express = require('express')
 const logger = require('../lib/logger')
-const { buildCheckoutUrl, getTransaction, PLAN_CODE } = require('../services/wompi')
+const { buildCheckoutUrl, getTransaction, PLAN_CODE, normalizePeriod } = require('../services/wompi')
 const {
   markPendingPayment,
   activateSubscription,
@@ -18,8 +18,18 @@ function referenceToUid(reference) {
   const raw = String(reference || '').trim()
   if (!raw.startsWith(`${PLAN_CODE}_`)) return ''
   const parts = raw.split('_')
-  if (parts.length < 3) return ''
-  return parts.slice(1, -1).join('_')
+  // Compatibilidad con referencias antiguas: cashpro_<uid>_<timestamp>
+  if (parts.length === 3) return parts.slice(1, -1).join('_')
+  if (parts.length < 4) return ''
+  return parts.slice(2, -1).join('_')
+}
+
+function referenceToPeriod(reference) {
+  const raw = String(reference || '').trim()
+  if (!raw.startsWith(`${PLAN_CODE}_`)) return 'monthly'
+  const parts = raw.split('_')
+  if (parts.length < 4) return 'monthly'
+  return normalizePeriod(parts[1])
 }
 
 router.post('/checkout-link', async (req, res) => {
@@ -28,13 +38,14 @@ router.post('/checkout-link', async (req, res) => {
   const fullName = String(req.body?.fullName || '').trim()
   const phone = String(req.body?.phone || '').trim()
   const redirectUrl = String(req.body?.redirectUrl || '').trim()
+  const planPeriod = normalizePeriod(req.body?.planPeriod)
 
   if (!uid || !email) {
     return res.status(400).json({ ok: false, error: 'uid y email son requeridos' })
   }
 
   try {
-    const payload = buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl })
+    const payload = buildCheckoutUrl({ uid, email, fullName, phone, redirectUrl, planPeriod })
     await markPendingPayment({ uid, email, fullName, reference: payload.reference })
     return res.json({ ok: true, data: payload })
   } catch (err) {
@@ -61,7 +72,8 @@ router.post('/confirm-transaction', async (req, res) => {
 
     const status = String(tx?.status || '').toUpperCase()
     if (status === 'APPROVED') {
-      const subscription = await activateSubscription({ uid, transactionId, reference })
+      const period = referenceToPeriod(reference)
+      const subscription = await activateSubscription({ uid, transactionId, reference, planPeriod: period })
       return res.json({
         ok: true,
         data: {

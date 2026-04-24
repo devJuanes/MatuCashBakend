@@ -1,16 +1,17 @@
 const { getAdminDb } = require('./firebaseAdmin')
-const { PLAN_CODE } = require('./wompi')
+const { PLAN_CODE, normalizePeriod, PERIOD_MONTHS, amountForPeriod } = require('./wompi')
 const env = require('../config/env')
 
-function addOneMonthMs(fromMs) {
+function addMonthsMs(fromMs, months) {
   const d = new Date(fromMs)
-  d.setMonth(d.getMonth() + 1)
+  d.setMonth(d.getMonth() + Math.max(1, Number(months) || 1))
   return d.getTime()
 }
 
 async function markPendingPayment({ uid, email, fullName, reference }) {
   const db = getAdminDb()
   const now = Date.now()
+  const period = normalizePeriod(String(reference || '').split('_')[1] || 'monthly')
   const userRef = db.collection('users').doc(uid)
   await userRef.set(
     {
@@ -20,7 +21,9 @@ async function markPendingPayment({ uid, email, fullName, reference }) {
       },
       subscription: {
         planCode: PLAN_CODE,
+        billingPeriod: period,
         status: 'pending_payment',
+        currentAmountCop: amountForPeriod(period),
         monthlyAmountCop: env.cashProMonthlyCop,
         lastReference: reference,
         updatedAtMs: now
@@ -30,21 +33,25 @@ async function markPendingPayment({ uid, email, fullName, reference }) {
   )
 }
 
-async function activateSubscription({ uid, transactionId, reference }) {
+async function activateSubscription({ uid, transactionId, reference, planPeriod }) {
   const db = getAdminDb()
   const now = Date.now()
+  const period = normalizePeriod(planPeriod || String(reference || '').split('_')[1] || 'monthly')
+  const months = PERIOD_MONTHS[period] || 1
   const userRef = db.collection('users').doc(uid)
   const snap = await userRef.get()
 
   const previousEnd = Number(snap.get('subscription.currentPeriodEndMs') || 0)
   const periodStart = previousEnd > now ? previousEnd : now
-  const periodEnd = addOneMonthMs(periodStart)
+  const periodEnd = addMonthsMs(periodStart, months)
 
   await userRef.set(
     {
       subscription: {
         planCode: PLAN_CODE,
+        billingPeriod: period,
         status: 'active',
+        currentAmountCop: amountForPeriod(period),
         monthlyAmountCop: env.cashProMonthlyCop,
         currentPeriodStartMs: periodStart,
         currentPeriodEndMs: periodEnd,
@@ -86,13 +93,16 @@ async function getSubscriptionStatus(uid) {
   const subscription = snap.get('subscription') || {}
   const status = String(subscription.status || 'inactive')
   const planCode = String(subscription.planCode || '')
+  const billingPeriod = normalizePeriod(subscription.billingPeriod || 'monthly')
   const periodEndMs = Number(subscription.currentPeriodEndMs || 0)
   const isActive = planCode === PLAN_CODE && status === 'active' && periodEndMs > Date.now()
 
   return {
     planCode,
+    billingPeriod,
     status: isActive ? 'active' : status,
     periodEndMs,
+    currentAmountCop: Number(subscription.currentAmountCop || amountForPeriod(billingPeriod)),
     monthlyAmountCop: Number(subscription.monthlyAmountCop || env.cashProMonthlyCop),
     isActive
   }
