@@ -63,6 +63,14 @@ async function activateSubscription({ uid, transactionId, reference, planPeriod 
     { merge: true }
   )
 
+  await userRef.collection('subscription_payments').doc(transactionId || `${now}`).set({
+    transactionId: String(transactionId || ''),
+    reference: String(reference || ''),
+    billingPeriod: period,
+    amountCop: amountForPeriod(period),
+    paidAtMs: now
+  })
+
   return {
     status: 'active',
     periodEndMs: periodEnd
@@ -96,6 +104,21 @@ async function getSubscriptionStatus(uid) {
   const billingPeriod = normalizePeriod(subscription.billingPeriod || 'monthly')
   const periodEndMs = Number(subscription.currentPeriodEndMs || 0)
   const isActive = planCode === PLAN_CODE && status === 'active' && periodEndMs > Date.now()
+  const paymentsSnap = await userRef
+    .collection('subscription_payments')
+    .orderBy('paidAtMs', 'desc')
+    .limit(20)
+    .get()
+  const recentPayments = paymentsSnap.docs.map((doc) => {
+    const d = doc.data() || {}
+    return {
+      id: doc.id,
+      transactionId: String(d.transactionId || ''),
+      billingPeriod: normalizePeriod(d.billingPeriod || 'monthly'),
+      amountCop: Number(d.amountCop || 0),
+      paidAtMs: Number(d.paidAtMs || 0)
+    }
+  })
 
   return {
     planCode,
@@ -104,6 +127,7 @@ async function getSubscriptionStatus(uid) {
     periodEndMs,
     currentAmountCop: Number(subscription.currentAmountCop || amountForPeriod(billingPeriod)),
     monthlyAmountCop: Number(subscription.monthlyAmountCop || env.cashProMonthlyCop),
+    recentPayments,
     isActive
   }
 }

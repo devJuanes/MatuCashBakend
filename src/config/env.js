@@ -39,8 +39,8 @@ const corsOrigins = splitCsv(
 const maxUploadMb = Math.min(25, Math.max(1, toInt(process.env.MAX_UPLOAD_MB, 6)))
 const uploadsDir = path.resolve(process.env.UPLOADS_DIR || path.join(process.cwd(), 'uploads'))
 const cashProMonthlyCop = toInt(process.env.CASHPRO_MONTHLY_COP, 15000)
-const cashProSemesterCop = toInt(process.env.CASHPRO_SEMESTER_COP, cashProMonthlyCop * 6)
-const cashProAnnualCop = toInt(process.env.CASHPRO_ANNUAL_COP, cashProMonthlyCop * 12)
+const cashProSemesterCop = toInt(process.env.CASHPRO_SEMESTER_COP, 81000)
+const cashProAnnualCop = toInt(process.env.CASHPRO_ANNUAL_COP, 144000)
 
 module.exports = {
   port: toInt(process.env.PORT, 4100),
