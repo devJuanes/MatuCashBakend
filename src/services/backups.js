@@ -102,6 +102,13 @@ function actionNote(action, payload) {
   return 'Actividad de gestión registrada en el sistema.'
 }
 
+function shortDisplayName(value) {
+  const full = String(value || '').trim()
+  if (!full) return 'Usuario MatuCash'
+  const parts = full.split(/\s+/).filter(Boolean)
+  return parts.slice(0, 2).join(' ')
+}
+
 function safeLogoPath() {
   const fromEnv = String(process.env.BACKUP_BRAND_LOGO_PATH || '').trim()
   const candidate = fromEnv || path.resolve(__dirname, '../../../MatuCash/public/logo-app.png')
@@ -112,6 +119,7 @@ function drawHeader(doc, report) {
   const pageWidth = doc.page.width
   const margin = doc.page.margins.left
   const contentWidth = pageWidth - (margin * 2)
+  const rightEdge = margin + contentWidth
   doc.save()
   doc.rect(margin, 34, contentWidth, 88).fill('#0F172A')
   doc.restore()
@@ -123,8 +131,15 @@ function drawHeader(doc, report) {
 
   doc.fillColor('#E2E8F0').fontSize(20).text('Informe Gerencial de Respaldo', margin + 78, 50)
   doc.fillColor('#94A3B8').fontSize(11).text('Generado por MatuCash', margin + 78, 76)
-  doc.fillColor('#CBD5E1').fontSize(10).text(`Periodo: ${report.rangeLabel}`, margin + 78, 92)
-  doc.fillColor('#CBD5E1').fontSize(10).text(`Usuario: ${report.ownerName}`, margin + 320, 92, { width: 220, align: 'right' })
+  doc.fillColor('#CBD5E1').fontSize(10).text(`Periodo: ${report.rangeLabel}`, margin + 78, 92, {
+    width: contentWidth - 86,
+    ellipsis: true
+  })
+  doc.fillColor('#CBD5E1').fontSize(10).text(`Usuario: ${report.ownerNameShort}`, margin + 78, 107, {
+    width: rightEdge - (margin + 78),
+    align: 'left',
+    ellipsis: true
+  })
   doc.moveDown(4.8)
 }
 
@@ -408,6 +423,7 @@ async function buildBackupReport(payload) {
   const report = {
     uid,
     ownerName,
+    ownerNameShort: shortDisplayName(ownerName),
     rangeLabel: label,
     summary: {
       clients: filteredClients.length,
