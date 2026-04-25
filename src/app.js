@@ -8,6 +8,7 @@ const whatsappTemplatesRoutes = require('./routes/whatsappTemplates')
 const notificationRoutes = require('./routes/notifications')
 const uploadRoutes = require('./routes/uploads')
 const billingRoutes = require('./routes/billing')
+const backupRoutes = require('./routes/backups')
 
 const app = express()
 const normalizeOrigin = (origin) => String(origin || '').trim().replace(/\/+$/, '')
@@ -48,6 +49,7 @@ app.use('/api/whatsapp', whatsappRoutes)
 app.use('/api/whatsapp-templates', whatsappTemplatesRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/billing', billingRoutes)
+app.use('/api/backups', backupRoutes)
 
 app.use((err, _req, res, next) => {
   if (err && String(err.message || '').startsWith('CORS bloqueado')) {

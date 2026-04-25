@@ -80,5 +80,11 @@ module.exports = {
   wompiTestBaseUrl: String(process.env.WOMPI_TEST_BASE_URL || 'https://sandbox.wompi.co/v1').trim().replace(/\/+$/, ''),
   cashProMonthlyCop,
   cashProSemesterCop,
-  cashProAnnualCop
+  cashProAnnualCop,
+  backupMailerHost: String(process.env.BACKUP_MAILER_HOST || 'smtp.gmail.com').trim(),
+  backupMailerPort: toInt(process.env.BACKUP_MAILER_PORT, 465),
+  backupMailerSecure: toBool(process.env.BACKUP_MAILER_SECURE, true),
+  backupMailerUser: String(process.env.BACKUP_MAILER_USER || '').trim(),
+  backupMailerPass: String(process.env.BACKUP_MAILER_PASS || '').trim(),
+  backupMailerFrom: String(process.env.BACKUP_MAILER_FROM || process.env.BACKUP_MAILER_USER || '').trim()
 }
